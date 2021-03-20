@@ -9,13 +9,7 @@
 //g++ tcp_async_server.cpp -pthread -lboost_thread -o server
 
 using boost::asio::ip::tcp;
-
-std::string make_daytime_string()
-{
-  using namespace std; // For time_t, time and ctime;
-  time_t now = time(0);
-  return ctime(&now);
-}
+using namespace std;
 
 class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 	public: 
@@ -30,12 +24,18 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 		}
 
 		void start(){
-			message_ = make_daytime_string();
+				cout << "[SERVER] New Connection: ";
 
-			boost::asio::async_write(socket_, boost::asio::buffer(message_),
-	        boost::bind(&tcp_connection::handle_write, shared_from_this(),
-	          boost::asio::placeholders::error,
-	          boost::asio::placeholders::bytes_transferred));
+				for(;;){
+					message_ = "hello";
+
+				boost::asio::async_write(socket_, boost::asio::buffer(message_),
+		        boost::bind(&tcp_connection::handle_write, shared_from_this(),
+		          boost::asio::placeholders::error,
+		          boost::asio::placeholders::bytes_transferred));
+				}
+				
+			
 		}
 
 	private:
@@ -57,7 +57,7 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 class tcp_server{
 	public:
 		tcp_server(boost::asio::io_context& io_context) : io_context_(io_context), 
-		acceptor_(io_context, tcp::endpoint(tcp::v4(), 13)){
+		acceptor_(io_context, tcp::endpoint(tcp::v4(), 15)){
 			start_accept();
 		}
 
@@ -68,6 +68,8 @@ class tcp_server{
 			acceptor_.async_accept(new_connection->socket(),
 				boost::bind(&tcp_server::handle_accept, this, new_connection,
 					boost::asio::placeholders::error));
+
+
 		}
 
 		void handle_accept(tcp_connection::pointer new_connection,
@@ -86,13 +88,18 @@ class tcp_server{
 
 
 int main(){
+
+	cout << "started" << endl;
+
 	try{
 		boost::asio::io_context io_context;
 		tcp_server server(io_context);
 		io_context.run();
 	}catch(std::exception& e){
-		//std::cerr < e.what() << std::endl;
+		std::cerr << e.what() << std::endl;
 	}
+
+	cout << "ended" << endl;
 
 	return 0;
 }
