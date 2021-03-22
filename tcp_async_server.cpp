@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#include <boost/array.hpp>
 
 //g++ tcp_async_server.cpp -pthread -lboost_thread -o server
 
@@ -57,14 +58,36 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 	  //         boost::asio::placeholders::error,
 	  //         boost::asio::placeholders::bytes_transferred));
 
-			int x = 1;
+			string message = "bpm:180";
 
-			printf("Value:  %p\n", &x );
-
-			boost::asio::async_write(socket_, boost::asio::buffer(x,sizeof(int*)),
+			boost::asio::async_write(socket_, boost::asio::buffer(message),
 			boost::bind(&tcp_connection::handle_write, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
+
+			for(;;){
+				cout << "loop start" << endl; //del
+
+				boost::array<char,128> buf;
+				boost::system::error_code error;
+
+				size_t len = socket_.read_some(boost::asio::buffer(buf), error);
+
+				if(error == boost::asio::error::eof){
+					cout << 2 << endl;
+					break;
+				}else if(error){
+					cout << 3 << endl;
+					throw boost::system::system_error(error);
+				}
+
+				cout << "!!!!!!!!!!" << endl;
+				cout << len << endl;
+				cout << buf.data() << endl;
+				cout << "!!!!!!!!!!" << endl;
+
+				cout << "loop end" << endl; //del
+			}
 
 			
 			cout << "start() ended" << endl; //del
@@ -98,9 +121,6 @@ class tcp_server{
 
 	private:
 		void start_accept(){
-
-			// cout << "enter message:";
-			// cin >> message_;
 
 			cout << "start_accept() started" << endl; //del
 			tcp_connection::pointer new_connection = tcp_connection::create(io_context_);
