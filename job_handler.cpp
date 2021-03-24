@@ -39,9 +39,6 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 				cout << "loop start" << endl; //del
 
 				boost::array<char,128> buf;
-				for(auto &v : array){
-					v = '\0';
-				}
 				boost::system::error_code error;
 				
 				size_t len = socket_.read_some(boost::asio::buffer(buf), error);
