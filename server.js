@@ -7,7 +7,7 @@ var port = process.env.PORT || 8080;
 var net = require("net");
 
 var job_socket;
-var job_server = "ec2-54-201-26-119.us-west-2.compute.amazonaws.com";
+var job_server = "127.0.0.1";
 var job_port = 15;
 
 function connect_job(){
@@ -28,7 +28,7 @@ function send_job(){
 	console.log("send_job");
 	
 	try{
-		job_socket.write('1234\0');
+		job_socket.write("test");
 	}catch(err){
 		console.log("Failed to send data to job server");
 		connect_job();
@@ -46,7 +46,13 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
 	console.log("connection");
 
-	socket.on('test', function(msg){
+	socket.on('y_plus', function(msg){
+
+		console.log(msg);
+		send_job();
+	});
+
+	socket.on('y_minus', function(msg){
 
 		console.log(msg);
 		send_job();
