@@ -47,6 +47,7 @@ io.on('connection', function(socket){
 	console.log("connection");
 
 	socket.on('test', function(msg){
+
 		console.log(msg);
 		send_job();
 	});
