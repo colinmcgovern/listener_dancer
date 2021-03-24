@@ -7,7 +7,7 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 
-//g++ job_handler.cpp -pthread -lboost_thread -o server
+//g++ job_handler.cpp -pthread -lboost_thread -o job_handler
 
 using boost::asio::ip::tcp;
 using namespace std;
@@ -35,19 +35,16 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 			 socket_.remote_endpoint().port() <<
 			endl;
 
-			client_t new_client = {
-				socket_.remote_endpoint().address().to_string(),
-				socket_.remote_endpoint().port() 
-			};
-
-			clients.push_back(new_client);
-
 			for(;;){
 				cout << "loop start" << endl; //del
 
 				boost::array<char,128> buf;
+				for(auto &v : array){
+					v = '\0';
+				}
 				boost::system::error_code error;
 				
+				size_t len = socket_.read_some(boost::asio::buffer(buf), error);
 
 				if(error == boost::asio::error::eof){
 					cout << 2 << endl;
@@ -58,12 +55,12 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 				}
 
 				cout << "!!!!!!!!!!" << endl;
-				cout << len << endl;
+				//cout << len << endl;
 				cout << buf.data() << endl;
 				cout << "!!!!!!!!!!" << endl;
 
-				string message = "test";
-				boost::asio::async_write(socket_, boost::asio::buffer(message),
+				//string message = "test";
+				boost::asio::async_write(socket_, boost::asio::buffer(buf),
 				boost::bind(&tcp_connection::handle_write, shared_from_this(),
 				boost::asio::placeholders::error,
 				boost::asio::placeholders::bytes_transferred));
