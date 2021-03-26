@@ -181,22 +181,26 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 				// 	cout << v << endl;
 				// }
 
-				last_rotation_x = stod(values[1]);
-				last_rotation_y = stod(values[2]);
-				last_rotation_z = stod(values[3]);
+				// last_rotation_x = stod(values[1]);
+				// last_rotation_y = stod(values[2]);
+				// last_rotation_z = stod(values[3]);
 
-				cout << "last_rotation_x " << last_rotation_x << endl; //del
-				cout << "last_rotation_y " << last_rotation_y << endl; //del
-				cout << "last_rotation_z " << last_rotation_z << endl; //del
+				// cout << "last_rotation_x " << last_rotation_x << endl; //del
+				// cout << "last_rotation_y " << last_rotation_y << endl; //del
+				// cout << "last_rotation_z " << last_rotation_z << endl; //del
 
-				rotate_x = rotate_x - last_rotation_x;
-				rotate_y = rotate_y - last_rotation_y;
-				rotate_z = rotate_z - last_rotation_z;
+				// rotate_x = rotate_x - last_rotation_x;
+				// rotate_y = rotate_y - last_rotation_y;
+				// rotate_z = rotate_z - last_rotation_z;
 
-				cout << "rotate_x " << rotate_x << endl; //del
-				cout << "rotate_y " << rotate_y << endl; //del
-				cout << "rotate_z " << rotate_z << endl; //del
-				
+				// cout << "rotate_x " << rotate_x << endl; //del
+				// cout << "rotate_y " << rotate_y << endl; //del
+				// cout << "rotate_z " << rotate_z << endl; //del
+
+				rotate_x = stod(values[1]);
+				rotate_y = stod(values[2]);
+				rotate_z = stod(values[3]);
+
 				cout << "!!!!!!!!!!" << endl;
 
 				//string message = "test";
