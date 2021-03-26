@@ -65,8 +65,27 @@ void colorcube()
     quad(0,1,5,4);
 }
 
-double rotate_y = 0; 
-double rotate_x = 0;
+std::vector<std::string> explode(std::string const & s, char delim)
+{
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+
+    for (std::string token; std::getline(iss, token, delim); )
+    {
+        result.push_back(std::move(token));
+    }
+
+    return result;
+}
+
+double last_rotation_x = 0;
+double last_rotation_y = 0;
+double last_rotation_z = 0;
+
+double rotate_x = last_rotation_x;
+double rotate_y = last_rotation_y; 
+double rotate_z = last_rotation_z;
+
 void specialKeys( int key, int x, int y ) 
 {
     if (key == GLUT_KEY_RIGHT)
@@ -102,6 +121,8 @@ void display()
 
     glRotatef( rotate_x, 1.0, 0.0, 0.0 );
     glRotatef( rotate_y, 0.0, 1.0, 0.0 );
+    glRotatef( rotate_z, 0.0, 0.0, 1.0 );
+
     colorcube();
 
     glutSwapBuffers();
@@ -154,8 +175,28 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 
 				cout << "!!!!!!!!!!" << endl;
 				//cout << len << endl;
-				cout << buf.data() << endl;
-				rotate_y += 5;
+				// cout << buf.data() << endl;
+				vector<string> values = explode(buf.data(),':');
+				// for(auto v : values){
+				// 	cout << v << endl;
+				// }
+
+				last_rotation_x = stod(values[1]);
+				last_rotation_y = stod(values[2]);
+				last_rotation_z = stod(values[3]);
+
+				cout << "last_rotation_x " << last_rotation_x << endl; //del
+				cout << "last_rotation_y " << last_rotation_y << endl; //del
+				cout << "last_rotation_z " << last_rotation_z << endl; //del
+
+				rotate_x = rotate_x - last_rotation_x;
+				rotate_y = rotate_y - last_rotation_y;
+				rotate_z = rotate_z - last_rotation_z;
+
+				cout << "rotate_x " << rotate_x << endl; //del
+				cout << "rotate_y " << rotate_y << endl; //del
+				cout << "rotate_z " << rotate_z << endl; //del
+				
 				cout << "!!!!!!!!!!" << endl;
 
 				//string message = "test";

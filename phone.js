@@ -13,7 +13,7 @@ var socket = io();
 
 function handleOrientation(event) {
 	console.log(event.alpha);
-	socket.emit("alpha",event.alpha);
+	socket.emit("rotate_update",":"+event.alpha+":"+event.beta+":"+event.gamma+":");
 }
 
 if (

@@ -33,11 +33,11 @@ function connect_job(){
 
 connect_job();
 
-function send_job(){
+function send_job(msg){
 	console.log("send_job");
 	
 	try{
-		job_socket.write("test");
+		job_socket.write(msg);
 	}catch(err){
 		console.log("Failed to send data to job server");
 		connect_job();
@@ -57,19 +57,19 @@ io.on('connection', function(socket) {
 	socket.on('y_plus', function(msg){
 
 		console.log(msg);
-		send_job();
+		send_job(msg);
 	});
 
 	socket.on('y_minus', function(msg){
 
 		console.log(msg);
-		send_job();
+		send_job(msg);
 	});
 
-	socket.on('alpha', function(msg){
+	socket.on('rotate_update', function(msg){
 
 		console.log(msg);
-		send_job();
+		send_job(msg);
 	});
 });
 
