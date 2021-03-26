@@ -1,8 +1,17 @@
-var app = require('express')();
-var express = require('express'); 
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var port = process.env.PORT || 8080;
+var fs = require('fs');
+var https = require('https');
+
+var express = require('express');
+var app = express();
+
+var options = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem')
+};
+var serverPort = 8080;
+
+var server = https.createServer(options, app);
+var io = require('socket.io')(server);
 
 var net = require("net");
 
@@ -36,15 +45,14 @@ function send_job(){
 	
 };
 
-
 app.use("/", express.static(__dirname + '/'));
 
-app.get('/', function(req, res){
+app.get('/', function(req, res) {
   res.sendFile(__dirname + '/');
 });
 
-io.on('connection', function(socket){
-	console.log("connection");
+io.on('connection', function(socket) {
+  console.log("connection");
 
 	socket.on('y_plus', function(msg){
 
@@ -58,9 +66,14 @@ io.on('connection', function(socket){
 		send_job();
 	});
 
+	socket.on('alpha', function(msg){
+
+		console.log(msg);
+		send_job();
+	});
 });
 
-
-http.listen(port, function(){
-  console.log('listening on *:' + port);
+server.listen(serverPort, function() {
+  console.log('server up and running at %s port', serverPort);
 });
+
