@@ -26,21 +26,22 @@ function connect_job(){
 	job_socket = net.connect(job_port, job_server);
 	
 	job_socket.on('error', function(ex) {
-		console.log("connection to job server failed");
-		throw '';
+		//console.log("connection to job server failed");
+		connect_job();
+		//throw '';
 	});
 }
 
 connect_job();
 
 function send_job(msg){
-	console.log("send_job");
+	//console.log("send_job");
 	
 	try{
 		job_socket.write(msg);
 	}catch(err){
-		console.log("Failed to send data to job server");
-		connect_job();
+		//console.log("Failed to send data to job server");
+		//connect_job();
 	}
 	
 };
@@ -54,21 +55,12 @@ app.get('/', function(req, res) {
 io.on('connection', function(socket) {
   console.log("connection");
 
-	socket.on('y_plus', function(msg){
-
+	socket.on('rotate_debug', function(msg){
 		console.log(msg);
-		send_job(msg);
-	});
-
-	socket.on('y_minus', function(msg){
-
-		console.log(msg);
-		send_job(msg);
 	});
 
 	socket.on('rotate_update', function(msg){
-
-		console.log(msg);
+		// console.log(msg);
 		send_job(msg);
 	});
 });

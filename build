@@ -1,0 +1,1 @@
+g++ job_server.cpp -pthread -lboost_thread -lglut -lGL -lGLU -o job_server
