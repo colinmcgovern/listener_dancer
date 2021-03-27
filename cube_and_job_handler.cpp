@@ -24,6 +24,14 @@ float ver[8][3] =
     {-1.0,1.0,-1.0},
     {1.0,1.0,-1.0},
     {1.0,-1.0,-1.0},
+    // {-1.38,-.673,.073},
+    // {-1.38,.673,.073},
+    // {1.38,.673,.073},
+    // {1.38,-.673,.073},
+    // {-1.38,-.673,-.073},
+    // {-1.38,.673,-.073},
+    // {1.38,.673,-.073},
+    // {1.38,-.673,-.073},    
 };
 
 GLfloat color[8][3] = 
@@ -101,27 +109,27 @@ void specialKeys( int key, int x, int y )
 
 void display()
 {
-    glClearColor( 0, 0, 0, 1 );
+    glClearColor( 0, 0, 0, 500 );
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     int w = glutGet( GLUT_WINDOW_WIDTH );
     int h = glutGet( GLUT_WINDOW_HEIGHT );
-    gluPerspective( 60, w / h, 0.1, 100 );
+    gluPerspective( 90, w / h, 0.1, 100 );
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
     gluLookAt
         ( 
-        3, 3, 3, 
+        0, 0, 3, 
         0, 0, 0,
-        0, 0, 1
+        0, 1, 0
         );
 
-    glRotatef( rotate_x, 1.0, 0.0, 0.0 );
-    glRotatef( rotate_y, 0.0, 1.0, 0.0 );
-    glRotatef( rotate_z, 0.0, 0.0, 1.0 );
+    glRotatef( rotate_x, 0.0, 1.0, 0.0 );
+    glRotatef( rotate_y, 1.0, 0.0, 0.0 );
+    glRotatef( rotate_z, 0.0, 0.0, -1.0 );
 
     colorcube();
 
@@ -276,10 +284,18 @@ class tcp_server{
 
 int main( int argc, char **argv ){
 
+
+	for(uint i=0;i<8;i++){
+		ver[i][0] *= .673;
+		ver[i][1] *= .073;
+		ver[i][2] *= 1.38;
+	}
+
 	cout << "main() started" << endl; //del
 
 	thread t1([&]{
 		glutInit( &argc, argv );
+
 	    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
 	    glutInitWindowSize( 640, 480 );
 	    glutCreateWindow( "GLUT" );

@@ -5,15 +5,30 @@ var socket = io();
 //   socket.emit("y_plus");
 // });
 
-// $( "#y_minus" ).click(function() {":"+
-// 	console.log("y_minus");
-//   socket.emit("y_minus");
-// });
+var adjust_x = 0;
+var adjust_y = 0;
+var adjust_z = 0;
 
+var last_x = 0;
+var last_y = 0;
+var last_z = 0;
+
+$( "#calibrate" ).click(function() {
+	adjust_x = -1 * last_x;
+	adjust_y = -1 * last_y;
+	adjust_z = -1 * last_z;
+  //socket.emit("rotate_update",":90:0:0:");
+});
+
+$( "#custom" ).click(function() {
+  socket.emit("rotate_update",":"+$("#x").val()+":"+$("#y").val()+":"+$("#z").val()+":");
+});
 
 function handleOrientation(event) {
-	console.log(event.alpha);
-	socket.emit("rotate_update",":"+event.alpha.toFixed(2)+":"+event.beta.toFixed(2)+":"+event.gamma.toFixed(2)+":");
+	socket.emit("rotate_update",":"+event.alpha.toFixed(5)+":"+event.beta.toFixed(5)+":"+event.gamma.toFixed(5)+":");
+	last_x = event.alpha.toFixed(2);
+	last_y = event.beta.toFixed(2);
+	last_z = event.gamma.toFixed(2);
 }
 
 if (
