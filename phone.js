@@ -24,12 +24,7 @@ function simple_degree(val){
 }
 
 $( document ).ready(function() {
-	if (
-	DeviceMotionEvent &&
-	typeof DeviceMotionEvent.requestPermission === "function"
-	) {
-		DeviceMotionEvent.requestPermission();
-	}
+	
 });
 
 $( "#calibrate_normal" ).click(function() {
@@ -55,6 +50,14 @@ $( "#show_raw" ).click(function() {
 });
 
 function handleOrientation(event) {
+
+	if (
+	DeviceMotionEvent &&
+	typeof DeviceMotionEvent.requestPermission === "function"
+	) {
+		DeviceMotionEvent.requestPermission();
+	}
+	
 	last_x = Number(event.alpha.toFixed(5)) + Number(cal_normal.x);
 	last_y = Number(event.beta.toFixed(5)) + Number(cal_normal.y);
 	last_z = Number(event.gamma.toFixed(5)) + Number(cal_normal.z);
