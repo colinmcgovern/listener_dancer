@@ -7,14 +7,20 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <GL/glut.h>
+#include <fstream>
+#include <chrono>
+#include <cstdio>
 
 //g++ cube_and_job_handler.cpp -pthread -lboost_thread -lglut -lGL -lGLU -o cube_and_job_handler
 
 using boost::asio::ip::tcp;
 using namespace std;
 using std::vector;
+using namespace std::chrono;
 
-once_flag flag;
+const bool DEBUG = 1;
+
+ofstream debug_file;
 
 float ver[8][3] = 
 {
@@ -168,7 +174,6 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 			endl;
 
 			for(;;){
-				cout << "loop start" << endl; //del
 
 				boost::array<char,128> buf;
 				boost::system::error_code error;
@@ -182,44 +187,36 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 					cout << 3 << endl;
 					throw boost::system::system_error(error);
 				}
-
-				cout << "!!!!!!!!!!" << endl;
-				//cout << len << endl;
-				// cout << buf.data() << endl;
 				vector<string> values = explode(buf.data(),':');
-				// for(auto v : values){
-				// 	cout << v << endl;
-				// }
 
-				// last_rotation_x = stod(values[1]);
-				// last_rotation_y = stod(values[2]);
-				// last_rotation_z = stod(values[3]);
+				cout << values[0] << " "<< values[1] << " "<< values[2] << endl; //del
 
-				// cout << "last_rotation_x " << last_rotation_x << endl; //del
-				// cout << "last_rotation_y " << last_rotation_y << endl; //del
-				// cout << "last_rotation_z " << last_rotation_z << endl; //del
 
-				// rotate_x = rotate_x - last_rotation_x;
-				// rotate_y = rotate_y - last_rotation_y;
-				// rotate_z = rotate_z - last_rotation_z;
+				if(values[0]=="x" && values[1]==values[2]){
+					rotate_x = stod(values[1]);
+				}
 
-				// cout << "rotate_x " << rotate_x << endl; //del
-				// cout << "rotate_y " << rotate_y << endl; //del
-				// cout << "rotate_z " << rotate_z << endl; //del
+				if(values[0]=="y" && values[1]==values[2]){
+					rotate_y = stod(values[1]);
+				}
 
-				rotate_x = stod(values[1]);
-				rotate_y = stod(values[2]);
-				rotate_z = stod(values[3]);
+				if(values[0]=="z" && values[1]==values[2]){
+					rotate_z = stod(values[1]);
+				}
 
-				cout << "!!!!!!!!!!" << endl;
+
+				if(DEBUG){
+					milliseconds ms = duration_cast< milliseconds >(
+    				system_clock::now().time_since_epoch());
+					debug_file << ms.count() << ","<<rotate_x<<","<<rotate_y<<","<<rotate_z<<","<<buf.data() << endl;
+				}
+				
 
 				//string message = "test";
 				boost::asio::async_write(socket_, boost::asio::buffer(buf),
 				boost::bind(&tcp_connection::handle_write, shared_from_this(),
 				boost::asio::placeholders::error,
 				boost::asio::placeholders::bytes_transferred));
-
-				cout << "loop end" << endl; //del
 			}
 
 			
@@ -285,6 +282,9 @@ class tcp_server{
 
 
 int main( int argc, char **argv ){
+
+	remove("data_given.csv");
+	debug_file.open ("data_given.csv");
 
 
 	for(uint i=0;i<8;i++){

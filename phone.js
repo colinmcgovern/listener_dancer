@@ -23,9 +23,17 @@ function simple_degree(val){
 	return Number(val);
 }
 
-$( document ).ready(function() {
-	
-});
+function pad(val){
+
+	var width = 128;
+
+	val = String(val);
+	while(val.length != width){
+		val = val+"!";
+	}
+
+	return val;
+}
 
 $( "#calibrate_normal" ).click(function() {
   socket.emit("rotate_debug",last_x+", "+last_y+", "+last_z);
@@ -58,12 +66,13 @@ function handleOrientation(event) {
 		DeviceMotionEvent.requestPermission();
 	}
 	
-	last_x = Number(event.alpha.toFixed(5)) + Number(cal_normal.x);
-	last_y = Number(event.beta.toFixed(5)) + Number(cal_normal.y);
-	last_z = Number(event.gamma.toFixed(5)) + Number(cal_normal.z);
-	socket.emit("rotate_update",":"+last_x+":"+last_y+":"+last_z+":");
+	last_x = simple_degree((Number(event.alpha) + Number(cal_normal.x))).toFixed(5);
+	last_y = simple_degree((Number(event.beta) + Number(cal_normal.y))).toFixed(5);
+	last_z = simple_degree((Number(event.gamma) + Number(cal_normal.z))).toFixed(5);
+	socket.emit("rotate_update",pad("x:"+last_x+":"+last_x+":"));
+	socket.emit("rotate_update",pad("y:"+last_y+":"+last_y+":"));
+	socket.emit("rotate_update",pad("z:"+last_z+":"+last_z+":"));
 }
-
 
 
 window.addEventListener("deviceorientation", handleOrientation);
