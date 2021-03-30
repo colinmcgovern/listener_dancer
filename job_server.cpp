@@ -43,43 +43,41 @@ float ver[8][3] =
     // {1.38,-.673,-.073},    
 };
 
-GLfloat color[8][3] = 
+GLfloat color[6][3] = 
 {
-    {0.0,0.0,0.0},
     {1.0,0.0,0.0},
-    {1.0,1.0,0.0},
     {0.0,1.0,0.0},
     {0.0,0.0,1.0},
-    {1.0,0.0,1.0},
-    {1.0,1.0,1.0},
+    {1.0,1.0,0.0},
     {0.0,1.0,1.0},
+    {1.0,0.0,1.0},
 };
 
-void quad(int a,int b,int c,int d)
+void quad(int color_index, int a,int b,int c,int d)
 {
     glBegin(GL_QUADS);
-    glColor3fv(color[a]);
+    glColor3fv(color[color_index]);
     glVertex3fv(ver[a]);
 
-    glColor3fv(color[b]);
+    glColor3fv(color[color_index]);
     glVertex3fv(ver[b]);
 
-    glColor3fv(color[c]);
+    glColor3fv(color[color_index]);
     glVertex3fv(ver[c]);
 
-    glColor3fv(color[d]);
+    glColor3fv(color[color_index]);
     glVertex3fv(ver[d]);
     glEnd();
 }
 
 void colorcube()
 {
-    quad(0,3,2,1);
-    quad(2,3,7,6);
-    quad(0,4,7,3);
-    quad(1,2,6,5);
-    quad(4,5,6,7);
-    quad(0,1,5,4);
+    quad(0,0,3,2,1);
+    quad(1,2,3,7,6);
+    quad(2,0,4,7,3);
+    quad(3,1,2,6,5);
+    quad(4,4,5,6,7);
+    quad(5,0,1,5,4);
 }
 
 std::vector<std::string> explode(std::string const & s, char delim)
@@ -362,10 +360,9 @@ int main( int argc, char **argv ){
 
 	thread t1([&]{
 		glutInit( &argc, argv );
-
 	    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
 	    glutInitWindowSize( 800, 800 );
-	    glutCreateWindow( "GLUT" );
+	    glutCreateWindow( "DEMO" );
 	    glutDisplayFunc( display );
 	    glEnable( GL_DEPTH_TEST );
 	    glutTimerFunc(0, timer, 0);
