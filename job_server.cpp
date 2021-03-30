@@ -10,15 +10,16 @@
 #include <fstream>
 #include <chrono>
 #include <cstdio>
+#include <utility>
 
-//g++ cube_and_job_handler.cpp -pthread -lboost_thread -lglut -lGL -lGLU -o cube_and_job_handler
+using namespace std::chrono;
+using namespace std;
 
 using boost::asio::ip::tcp;
-using namespace std;
 using std::vector;
-using namespace std::chrono;
+using std::pair;
 
-const bool DEBUG = 1;
+const bool DEBUG = 0;
 
 ofstream debug_file;
 
@@ -94,13 +95,34 @@ std::vector<std::string> explode(std::string const & s, char delim)
     return result;
 }
 
-double last_rotation_x = 0;
-double last_rotation_y = 0;
-double last_rotation_z = 0;
+pair<long,double> last_rotate_x = make_pair(0,0);
+pair<long,double> last_rotate_y = make_pair(0,0);
+pair<long,double> last_rotate_z = make_pair(0,0);
 
-double rotate_x = last_rotation_x;
-double rotate_y = last_rotation_y; 
-double rotate_z = last_rotation_z;
+double rotate_x = last_rotate_x.second;
+double rotate_y = last_rotate_y.second; 
+double rotate_z = last_rotate_z.second;
+
+double max_x_vel = 0;
+double max_y_vel = 0;
+double max_z_vel = 0;
+
+double degree_dist(double x, double y){
+	double smaller, larger;
+	if(x < y){
+		smaller = x;
+		larger = y;
+	}else{
+		smaller = y;
+		larger = x;
+	}
+
+	if(larger-smaller>180){
+		larger -= 360;
+	}
+
+	return abs(larger-smaller);
+}
 
 void specialKeys( int key, int x, int y ) 
 {
@@ -189,26 +211,80 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 				}
 				vector<string> values = explode(buf.data(),':');
 
-				cout << values[0] << " "<< values[1] << " "<< values[2] << endl; //del
+				long curr_time = long(duration_cast< milliseconds >(
+    				system_clock::now().time_since_epoch()).count());
+
+				//cout << curr_time << " " << values[0] << " "<< values[1] << " "<< values[2] << endl; //del
 
 
-				if(values[0]=="x" && values[1]==values[2]){
+				if(values[0]=="x" && values[1]==values[2] && curr_time!=last_rotate_x.first){
+
+					double new_rotate = stod(values[1]);
+
 					rotate_x = stod(values[1]);
+
+					double x_vel = degree_dist(last_rotate_x.second,new_rotate) / double(curr_time-last_rotate_x.first);
+
+					if(x_vel > max_x_vel && curr_time!=last_rotate_x.first){
+						max_x_vel = x_vel;
+					}
+
+					last_rotate_x = make_pair(curr_time,stod(values[1]));
+
+					// if(x_vel>20){
+					// 	cout << "Rotate denied: x_vel was " << x_vel << endl;
+					// }else{
+						rotate_x = new_rotate;
+					// }
+
 				}
 
-				if(values[0]=="y" && values[1]==values[2]){
+				if(values[0]=="y" && values[1]==values[2] && curr_time!=last_rotate_y.first){
+
+					double new_rotate = stod(values[1]);
+
 					rotate_y = stod(values[1]);
+
+					double y_vel = degree_dist(last_rotate_y.second,new_rotate) / double(curr_time-last_rotate_y.first);
+
+					if(y_vel > max_y_vel && curr_time!=last_rotate_y.first){
+						max_y_vel = y_vel;
+					}
+
+					last_rotate_y = make_pair(curr_time,stod(values[1]));
+
+					// if(y_vel>20){
+					// 	cout << "Rotate denied: y_vel was " << y_vel << endl;
+					// }else{
+						rotate_y = new_rotate;
+					// }
+					
 				}
 
-				if(values[0]=="z" && values[1]==values[2]){
+				if(values[0]=="z" && values[1]==values[2] && curr_time!=last_rotate_z.first){
+					double new_rotate = stod(values[1]);
+
 					rotate_z = stod(values[1]);
+
+					double z_vel = degree_dist(last_rotate_z.second,new_rotate) / double(curr_time-last_rotate_z.first);
+
+					if(z_vel > max_z_vel && curr_time!=last_rotate_z.first){
+						max_z_vel = z_vel;
+					}
+
+					last_rotate_z = make_pair(curr_time,stod(values[1]));
+
+					// if(z_vel>20){
+					// 	cout << "Rotate denied: z_vel was " << z_vel << endl;
+					// }else{
+						rotate_z = new_rotate;
+					// }
+					
 				}
 
 
-				if(DEBUG){
-					milliseconds ms = duration_cast< milliseconds >(
-    				system_clock::now().time_since_epoch());
-					debug_file << ms.count() << ","<<rotate_x<<","<<rotate_y<<","<<rotate_z<<","<<buf.data() << endl;
+				if(DEBUG){				
+					debug_file << curr_time << ","<<rotate_x<<","<<rotate_y<<","<<rotate_z<<","<<buf.data() << endl;
 				}
 				
 

@@ -36,6 +36,15 @@ function pad(val){
 }
 
 $( "#calibrate_normal" ).click(function() {
+
+if (
+    DeviceMotionEvent &&
+    typeof DeviceMotionEvent.requestPermission === "function"
+  ) {
+    DeviceMotionEvent.requestPermission();
+  }
+
+	
   socket.emit("rotate_debug",last_x+", "+last_y+", "+last_z);
   cal_normal.x = 0 - simple_degree(last_x);
   cal_normal.y = 0 - simple_degree(last_y);
@@ -58,13 +67,6 @@ $( "#show_raw" ).click(function() {
 });
 
 function handleOrientation(event) {
-
-	if (
-	DeviceMotionEvent &&
-	typeof DeviceMotionEvent.requestPermission === "function"
-	) {
-		DeviceMotionEvent.requestPermission();
-	}
 	
 	last_x = simple_degree((Number(event.alpha) + Number(cal_normal.x))).toFixed(5);
 	last_y = simple_degree((Number(event.beta) + Number(cal_normal.y))).toFixed(5);
@@ -76,3 +78,4 @@ function handleOrientation(event) {
 
 
 window.addEventListener("deviceorientation", handleOrientation);
+
