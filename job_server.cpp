@@ -124,19 +124,6 @@ double degree_dist(double x, double y){
 	return abs(larger-smaller);
 }
 
-void specialKeys( int key, int x, int y ) 
-{
-    if (key == GLUT_KEY_RIGHT)
-        rotate_y += 5;
-    else if (key == GLUT_KEY_LEFT)
-        rotate_y -= 5;
-    else if (key == GLUT_KEY_UP)
-        rotate_x += 5;
-    else if (key == GLUT_KEY_DOWN)
-        rotate_x -= 5;
-    glutPostRedisplay();
-}
-
 void display()
 {
     glClearColor( 0, 0, 0, 500 );
@@ -359,9 +346,11 @@ class tcp_server{
 
 int main( int argc, char **argv ){
 
-	remove("data_given.csv");
-	debug_file.open ("data_given.csv");
-
+	if(DEBUG){
+		remove("data_given.csv");
+		debug_file.open ("data_given.csv");
+	}
+	
 
 	for(uint i=0;i<8;i++){
 		ver[i][0] *= .673;
@@ -378,7 +367,6 @@ int main( int argc, char **argv ){
 	    glutInitWindowSize( 800, 800 );
 	    glutCreateWindow( "GLUT" );
 	    glutDisplayFunc( display );
-	    glutSpecialFunc( specialKeys );
 	    glEnable( GL_DEPTH_TEST );
 	    glutTimerFunc(0, timer, 0);
 	    glutMainLoop();
