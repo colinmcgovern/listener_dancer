@@ -1,1 +1,1 @@
-g++ job_server.cpp -pthread -lboost_thread -lglut -lGL -lGLU -o job_server
+g++ shader.cpp texture.cpp job_server.cpp visual.cpp -pthread -lboost_thread -lglfw -lGLEW -lGL -o job_server

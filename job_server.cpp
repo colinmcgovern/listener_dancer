@@ -6,11 +6,11 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <GL/glut.h>
 #include <fstream>
 #include <chrono>
 #include <cstdio>
 #include <utility>
+#include "visual.h"
 
 using namespace std::chrono;
 using namespace std;
@@ -18,67 +18,6 @@ using namespace std;
 using boost::asio::ip::tcp;
 using std::vector;
 using std::pair;
-
-const bool DEBUG = 0;
-
-ofstream debug_file;
-
-float ver[8][3] = 
-{
-    {-1.0,-1.0,1.0},
-    {-1.0,1.0,1.0},
-    {1.0,1.0,1.0},
-    {1.0,-1.0,1.0},
-    {-1.0,-1.0,-1.0},
-    {-1.0,1.0,-1.0},
-    {1.0,1.0,-1.0},
-    {1.0,-1.0,-1.0},
-    // {-1.38,-.673,.073},
-    // {-1.38,.673,.073},
-    // {1.38,.673,.073},
-    // {1.38,-.673,.073},
-    // {-1.38,-.673,-.073},
-    // {-1.38,.673,-.073},
-    // {1.38,.673,-.073},
-    // {1.38,-.673,-.073},    
-};
-
-GLfloat color[6][3] = 
-{
-    {1.0,0.0,0.0},
-    {0.0,1.0,0.0},
-    {0.0,0.0,1.0},
-    {1.0,1.0,0.0},
-    {0.0,1.0,1.0},
-    {1.0,0.0,1.0},
-};
-
-void quad(int color_index, int a,int b,int c,int d)
-{
-    glBegin(GL_QUADS);
-    glColor3fv(color[color_index]);
-    glVertex3fv(ver[a]);
-
-    glColor3fv(color[color_index]);
-    glVertex3fv(ver[b]);
-
-    glColor3fv(color[color_index]);
-    glVertex3fv(ver[c]);
-
-    glColor3fv(color[color_index]);
-    glVertex3fv(ver[d]);
-    glEnd();
-}
-
-void colorcube()
-{
-    quad(0,0,3,2,1);
-    quad(1,2,3,7,6);
-    quad(2,0,4,7,3);
-    quad(3,1,2,6,5);
-    quad(4,4,5,6,7);
-    quad(5,0,1,5,4);
-}
 
 std::vector<std::string> explode(std::string const & s, char delim)
 {
@@ -105,6 +44,8 @@ double max_x_vel = 0;
 double max_y_vel = 0;
 double max_z_vel = 0;
 
+visual v;
+
 double degree_dist(double x, double y){
 	double smaller, larger;
 	if(x < y){
@@ -120,42 +61,6 @@ double degree_dist(double x, double y){
 	}
 
 	return abs(larger-smaller);
-}
-
-void display()
-{
-    glClearColor( 0, 0, 0, 500 );
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity();
-    int w = glutGet( GLUT_WINDOW_WIDTH );
-    int h = glutGet( GLUT_WINDOW_HEIGHT );
-    gluPerspective( 90, w / h, 0.1, 100 );
-
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity();
-    gluLookAt
-        ( 
-        0, 0, 3, 
-        0, 0, 0,
-        0, 1, 0
-        );
-
-    glRotatef( rotate_x, 0.0, 1.0, 0.0 );
-    glRotatef( rotate_y, 1.0, 0.0, 0.0 );
-    glRotatef( rotate_z, 0.0, 0.0, -1.0 );
-
-    colorcube();
-
-    glutSwapBuffers();
-}
-
-void timer(int extra)
-{
-    //rotate_y += 5;
-    glutTimerFunc(30, timer, 0);
-    glutPostRedisplay();
 }
 
 class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
@@ -216,12 +121,7 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 
 					last_rotate_x = make_pair(curr_time,stod(values[1]));
 
-					// if(x_vel>20){
-					// 	cout << "Rotate denied: x_vel was " << x_vel << endl;
-					// }else{
-						rotate_x = new_rotate;
-					// }
-
+					rotate_x = new_rotate;
 				}
 
 				if(values[0]=="y" && values[1]==values[2] && curr_time!=last_rotate_y.first){
@@ -238,12 +138,7 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 
 					last_rotate_y = make_pair(curr_time,stod(values[1]));
 
-					// if(y_vel>20){
-					// 	cout << "Rotate denied: y_vel was " << y_vel << endl;
-					// }else{
-						rotate_y = new_rotate;
-					// }
-					
+					rotate_y = new_rotate;
 				}
 
 				if(values[0]=="z" && values[1]==values[2] && curr_time!=last_rotate_z.first){
@@ -259,19 +154,11 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 
 					last_rotate_z = make_pair(curr_time,stod(values[1]));
 
-					// if(z_vel>20){
-					// 	cout << "Rotate denied: z_vel was " << z_vel << endl;
-					// }else{
-						rotate_z = new_rotate;
-					// }
+					rotate_z = new_rotate;
 					
 				}
 
-
-				if(DEBUG){				
-					debug_file << curr_time << ","<<rotate_x<<","<<rotate_y<<","<<rotate_z<<","<<buf.data() << endl;
-				}
-				
+				v.update_rotation(rotate_x,rotate_y,rotate_z);
 
 				//string message = "test";
 				boost::asio::async_write(socket_, boost::asio::buffer(buf),
@@ -344,29 +231,10 @@ class tcp_server{
 
 int main( int argc, char **argv ){
 
-	if(DEBUG){
-		remove("data_given.csv");
-		debug_file.open ("data_given.csv");
-	}
-	
-
-	for(uint i=0;i<8;i++){
-		ver[i][0] *= .673;
-		ver[i][1] *= .073;
-		ver[i][2] *= 1.38;
-	}
-
 	cout << "main() started" << endl; //del
 
-	thread t1([&]{
-		glutInit( &argc, argv );
-	    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
-	    glutInitWindowSize( 800, 800 );
-	    glutCreateWindow( "DEMO" );
-	    glutDisplayFunc( display );
-	    glEnable( GL_DEPTH_TEST );
-	    glutTimerFunc(0, timer, 0);
-	    glutMainLoop();
+	thread t1([&v]{
+		v.start();
 	});
 
 	for(;;){
