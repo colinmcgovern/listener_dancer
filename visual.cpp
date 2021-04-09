@@ -97,9 +97,9 @@ void visual::start()
 		//transform.GetScale()->x = absSinCounter;
 		//transform.GetScale()->y = absSinCounter;
 
-		transform.GetRot()->x = x;
-		transform.GetRot()->y = y;
-		transform.GetRot()->z = z;
+		transform.GetRot()->x = -y/360.0f*6.28f - 6.28f/4;
+		transform.GetRot()->y = -z/360.0f*6.28f;
+		transform.GetRot()->z = x/360.0f*6.28f + 6.28f/4;
 
 		shader.Bind();
 		texture.Bind();

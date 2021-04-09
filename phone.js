@@ -12,13 +12,13 @@ function print_cal(val){
 }
 
 function simple_degree(val){
-	while(val<0){
-		val += 360;
-	}
+	// while(val<0){
+	// 	val += 360;
+	// }
 
-	while(val>=360){
-		val -= 360;
-	}
+	// while(val>=360){
+	// 	val -= 360;
+	// }
 
 	return Number(val);
 }
@@ -50,14 +50,6 @@ if (
   cal_normal.y = 0 - simple_degree(last_y);
   cal_normal.z = 0 - simple_degree(last_z);
   print_cal(cal_normal);
-});
-
-$( "#calibrate_left" ).click(function() {
-  socket.emit("rotate_debug",last_x+", "+last_y+", "+last_z);
-});
-
-$( "#show_cal" ).click(function() {
-  socket.emit("rotate_debug",last_x+", "+last_y+", "+last_z);
 });
 
 $( "#show_raw" ).click(function() {
