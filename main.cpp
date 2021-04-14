@@ -19,6 +19,22 @@ using boost::asio::ip::tcp;
 using std::vector;
 using std::pair;
 
+pair<long,double> last_rotate_x = make_pair(0,0);
+pair<long,double> last_rotate_y = make_pair(0,0);
+pair<long,double> last_rotate_z = make_pair(0,0);
+
+bool turn_around_x = 0;
+bool turn_around_y = 0;
+bool turn_around_z = 0;
+
+double rotate_x = 0;
+double rotate_y = 0;
+double rotate_z = 0;
+
+double max_x_vel = 0;
+double max_y_vel = 0;
+double max_z_vel = 0;
+
 std::vector<std::string> explode(std::string const & s, char delim)
 {
     std::vector<std::string> result;
@@ -31,18 +47,6 @@ std::vector<std::string> explode(std::string const & s, char delim)
 
     return result;
 }
-
-pair<long,double> last_rotate_x = make_pair(0,0);
-pair<long,double> last_rotate_y = make_pair(0,0);
-pair<long,double> last_rotate_z = make_pair(0,0);
-
-double rotate_x = 0;
-double rotate_y = 0;
-double rotate_z = 0;
-
-double max_x_vel = 0;
-double max_y_vel = 0;
-double max_z_vel = 0;
 
 visual v;
 
@@ -111,7 +115,13 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 
 					double new_rotate = stod(values[1]);
 
-					rotate_x = stod(values[1]);
+					cout << abs(last_rotate_x-new_rotate) << " " << endl; //del
+
+					if(abs(last_rotate_x-new_rotate)>=180){
+						turn_around_x = !turn_around_x;
+					}
+
+					rotate_x = stod(values[1]) + turn_around_x*180;
 
 					double x_vel = degree_dist(last_rotate_x.second,new_rotate) / double(curr_time-last_rotate_x.first);
 
@@ -126,7 +136,13 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 
 					double new_rotate = stod(values[1]);
 
-					rotate_y = stod(values[1]);
+					cout << abs(last_rotate_y-new_rotate) << " " << endl; //del
+
+					if(abs(last_rotate_y-new_rotate)>=180){
+						turn_around_y = !turn_around_y;
+					}
+
+					rotate_y = stod(values[1]) + turn_around_y*180;
 
 					double y_vel = degree_dist(last_rotate_y.second,new_rotate) / double(curr_time-last_rotate_y.first);
 
@@ -138,9 +154,16 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 				}
 
 				if(values[0]=="z" && values[1]==values[2] && curr_time!=last_rotate_z.first){
+
 					double new_rotate = stod(values[1]);
 
-					rotate_z = stod(values[1]);
+					cout << abs(last_rotate_z-new_rotate) << " " << endl; //del
+
+					if(abs(last_rotate_z-new_rotate)>=180){
+						turn_around_z = !turn_around_z;
+					}
+
+					rotate_z = stod(values[1]) + turn_around_z*180;
 
 					double z_vel = degree_dist(last_rotate_z.second,new_rotate) / double(curr_time-last_rotate_z.first);
 
@@ -154,7 +177,7 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 				v.update_rotation(rotate_x,rotate_y,rotate_z);
 
 				//del
-				cout << int(rotate_x) << " " << int(rotate_y) << " " << int(rotate_z) << endl;
+				//cout << int(rotate_x) << " " << int(rotate_y) << " " << int(rotate_z) << endl;
 				//del
 
 				//string message = "test";
@@ -247,6 +270,8 @@ int main( int argc, char **argv ){
 
 
 	cout << "main() ended" << endl; //del
+
+	t1.join();
 
 	return 0;
 }

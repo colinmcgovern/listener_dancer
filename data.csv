@@ -1,0 +1,19 @@
+main() started
+tcp_server() started
+start_accept() started
+tcp_connection::pointer()
+tcp_connection()
+socket()
+start_accept() ended
+tcp_server() ended
+handle_accept() started
+start() started
+Sending info to 127.0.0.1:60796
+3
+tcp_server() started
+start_accept() started
+tcp_connection::pointer()
+tcp_connection()
+socket()
+start_accept() ended
+tcp_server() ended

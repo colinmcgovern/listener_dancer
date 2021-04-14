@@ -68,7 +68,7 @@ void visual::start()
 							  23, 22, 20
 	                          };
 
-	Mesh mesh(vertices, sizeof(vertices)/sizeof(vertices[0]), indices, sizeof(indices)/sizeof(indices[0]));
+	//Mesh mesh(vertices, sizeof(vertices)/sizeof(vertices[0]), indices, sizeof(indices)/sizeof(indices[0]));
 	Mesh monkey("./res/s7.obj");
 	Shader shader("./res/basicShader");
 	Texture texture("./res/rust.png");

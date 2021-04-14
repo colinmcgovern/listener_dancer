@@ -12,13 +12,13 @@ function print_cal(val){
 }
 
 function simple_degree(val){
-	// while(val<0){
-	// 	val += 360;
-	// }
+	while(val<0){
+		val += 360;
+	}
 
-	// while(val>=360){
-	// 	val -= 360;
-	// }
+	while(val>=360){
+		val -= 360;
+	}
 
 	return Number(val);
 }
@@ -63,6 +63,7 @@ function handleOrientation(event) {
 	last_x = simple_degree((Number(event.alpha) + Number(cal_normal.x))).toFixed(5);
 	last_y = simple_degree((Number(event.beta) + Number(cal_normal.y))).toFixed(5);
 	last_z = simple_degree((Number(event.gamma) + Number(cal_normal.z))).toFixed(5);
+
 	socket.emit("rotate_update",pad("x:"+last_x+":"+last_x+":"));
 	socket.emit("rotate_update",pad("y:"+last_y+":"+last_y+":"));
 	socket.emit("rotate_update",pad("z:"+last_z+":"+last_z+":"));

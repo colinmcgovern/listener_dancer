@@ -60,7 +60,7 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('rotate_update', function(msg){
-		// console.log(msg);
+		//console.log(msg);
 		send_job(msg);
 	});
 });
