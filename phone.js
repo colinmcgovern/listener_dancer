@@ -44,11 +44,12 @@ if (
     DeviceMotionEvent.requestPermission();
   }
 
-	
-  socket.emit("rotate_debug",last_x+", "+last_y+", "+last_z);
+  socket.emit("calibrate");
+
   cal_normal.x = 0 - simple_degree(last_x);
   cal_normal.y = 0 - simple_degree(last_y);
   cal_normal.z = 0 - simple_degree(last_z);
+
   print_cal(cal_normal);
 });
 

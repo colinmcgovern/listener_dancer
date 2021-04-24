@@ -10,6 +10,9 @@
 #include <chrono>
 #include <cstdio>
 #include <utility>
+#include <iomanip>
+#include <mutex> 
+
 #include "visual.h"
 
 using namespace std::chrono;
@@ -23,17 +26,22 @@ pair<long,double> last_rotate_x = make_pair(0,0);
 pair<long,double> last_rotate_y = make_pair(0,0);
 pair<long,double> last_rotate_z = make_pair(0,0);
 
-bool turn_around_x = 0;
-bool turn_around_y = 0;
-bool turn_around_z = 0;
+int turn_around_x = 0;
+int num_turnarounds_x = 0;
 
 double rotate_x = 0;
 double rotate_y = 0;
 double rotate_z = 0;
 
+mutex rotate_mutex;
+
 double max_x_vel = 0;
 double max_y_vel = 0;
 double max_z_vel = 0;
+
+int rotate_x_correction = 0;
+int rotate_y_correction = 0;
+int rotate_z_correction = 0;
 
 std::vector<std::string> explode(std::string const & s, char delim)
 {
@@ -110,18 +118,29 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 
 				//cout << curr_time << " " << values[0] << " "<< values[1] << " "<< values[2] << endl; //del
 
+				if(values[0]=="calibrate" && values[1]==values[2]){
+					rotate_x_correction = -rotate_x;
+					rotate_y_correction = -rotate_y;
+					rotate_z_correction = -rotate_z;
+				}
 
 				if(values[0]=="x" && values[1]==values[2] && curr_time!=last_rotate_x.first){
 
 					double new_rotate = stod(values[1]);
 
-					cout << abs(last_rotate_x-new_rotate) << " " << endl; //del
+					//cout << abs(last_rotate_x.second-new_rotate) << " " << endl; //del
 
-					if(abs(last_rotate_x-new_rotate)>=180){
-						turn_around_x = !turn_around_x;
+					if(new_rotate - last_rotate_x.second >= 180){
+						turn_around_x -= 180;
+						num_turnarounds_x--;
 					}
 
-					rotate_x = stod(values[1]) + turn_around_x*180;
+					if(new_rotate - last_rotate_x.second <= -180){
+						turn_around_x += 180;
+						num_turnarounds_x++;
+					}
+
+					rotate_x = new_rotate + turn_around_x;
 
 					double x_vel = degree_dist(last_rotate_x.second,new_rotate) / double(curr_time-last_rotate_x.first);
 
@@ -129,20 +148,16 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 						max_x_vel = x_vel;
 					}
 
-					last_rotate_x = make_pair(curr_time,stod(values[1]));
+					last_rotate_x = make_pair(curr_time,new_rotate);
 				}
 
 				if(values[0]=="y" && values[1]==values[2] && curr_time!=last_rotate_y.first){
 
 					double new_rotate = stod(values[1]);
 
-					cout << abs(last_rotate_y-new_rotate) << " " << endl; //del
+					//cout << abs(last_rotate_y.second-new_rotate) << " " << endl; //del
 
-					if(abs(last_rotate_y-new_rotate)>=180){
-						turn_around_y = !turn_around_y;
-					}
-
-					rotate_y = stod(values[1]) + turn_around_y*180;
+					rotate_y = stod(values[1]);
 
 					double y_vel = degree_dist(last_rotate_y.second,new_rotate) / double(curr_time-last_rotate_y.first);
 
@@ -150,20 +165,16 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 						max_y_vel = y_vel;
 					}
 
-					last_rotate_y = make_pair(curr_time,stod(values[1]));
+					last_rotate_y = make_pair(curr_time,new_rotate);
 				}
 
 				if(values[0]=="z" && values[1]==values[2] && curr_time!=last_rotate_z.first){
 
 					double new_rotate = stod(values[1]);
 
-					cout << abs(last_rotate_z-new_rotate) << " " << endl; //del
+					//cout << abs(last_rotate_z.second-new_rotate) << " " << endl; //del
 
-					if(abs(last_rotate_z-new_rotate)>=180){
-						turn_around_z = !turn_around_z;
-					}
-
-					rotate_z = stod(values[1]) + turn_around_z*180;
+					rotate_z = stod(values[1]);
 
 					double z_vel = degree_dist(last_rotate_z.second,new_rotate) / double(curr_time-last_rotate_z.first);
 
@@ -171,14 +182,26 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection> {
 						max_z_vel = z_vel;
 					}
 
-					last_rotate_z = make_pair(curr_time,stod(values[1]));
+					last_rotate_z = make_pair(curr_time,new_rotate);
 				}
 
+				rotate_mutex.lock();
+				rotate_x += rotate_x_correction;
+				rotate_y += rotate_y_correction;
+				rotate_z += rotate_z_correction;
 				v.update_rotation(rotate_x,rotate_y,rotate_z);
+				rotate_mutex.unlock();
 
-				//del
-				//cout << int(rotate_x) << " " << int(rotate_y) << " " << int(rotate_z) << endl;
-				//del
+				//PRINTING ROTATION
+				if(values[0]=="x"){
+					cout << turn_around_x << " " <<
+					num_turnarounds_x << " " <<
+					std::setfill('0') << std::setw(3) << int(rotate_x) << " " << 
+					std::setfill('0') << std::setw(3) << int(rotate_y) << " " <<
+					std::setfill('0') << std::setw(3) << int(rotate_z) << endl;
+				}
+
+				//PRINTING ROTATION
 
 				//string message = "test";
 				boost::asio::async_write(socket_, boost::asio::buffer(buf),

@@ -63,6 +63,10 @@ io.on('connection', function(socket) {
 		//console.log(msg);
 		send_job(msg);
 	});
+
+	socket.on('rotate_update', function(msg){
+		send_job("calibrate:calibrate")
+	}
 });
 
 server.listen(serverPort, function() {
