@@ -1,1 +1,1 @@
-g++ shader.cpp texture.cpp job_server.cpp visual.cpp -pthread -lboost_thread -lglfw -lGLEW -lGL -o job_server
+g++ visual_server/shader.cpp visual_server/texture.cpp visual_server/visual_server.cpp visual_server/visual.cpp -pthread -lboost_thread -lglfw -lGLEW -lGL -o visual_server.out

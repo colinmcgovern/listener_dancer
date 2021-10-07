@@ -5,8 +5,8 @@ var express = require('express');
 var app = express();
 
 var options = {
-  key: fs.readFileSync('./key.pem'),
-  cert: fs.readFileSync('./cert.pem')
+  key: fs.readFileSync('./web_server/key.pem'),
+  cert: fs.readFileSync('./web_server/cert.pem')
 };
 var serverPort = 443;
 
@@ -46,21 +46,20 @@ function send_job(msg){
 	
 };
 
-app.use("/", express.static(__dirname + '/'));
+app.use("/", express.static(__dirname + '/web_server/'));
 
 app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/');
+  res.sendFile(__dirname + '/web_server/');
 });
 
 io.on('connection', function(socket) {
-  console.log("connection");
+  console.log("Connection!");
 
 	socket.on('rotate_debug', function(msg){
 		console.log(msg);
 	});
 
 	socket.on('rotate_update', function(msg){
-		// console.log(msg);
 		send_job(msg);
 	});
 });
